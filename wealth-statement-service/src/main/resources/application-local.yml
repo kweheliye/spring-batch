@@ -1,0 +1,91 @@
+spring:
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://localhost;databaseName=wealthdb
+    username: root
+    password: root
+  jpa:
+    database: SQL_SERVER
+    show-sql: true
+    hibernate:
+      dialect: org.hibernate.dialect. SQLServer2012Dialect
+      naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
+      ddl-auto: update
+  batch:
+    initialize-schema: always
+    job:
+      enabled: false
+
+directory:
+  statement:
+    eom: ${maven.basedir}/input/statements/eom/
+    adhoc: ${maven.basedir}/input/statements/adhoc/
+
+maven:
+  basedir: @project.basedir@
+file:
+  path:
+    customer-info: ${maven.basedir}/input/customer/uae_MACIS.txt
+
+template:
+  folder: /templates
+  statement: statement-template.ftl
+
+cron:
+  job:
+    customer: 0 30 * * * ?
+    eom: 0 30 * * * ?
+    adhoc: 0 30 * * * ?
+
+mail:
+  default-encoding: UTF-8
+  port: 587
+  host: smtp.live.com
+  debug: true
+  username: kamalhashi@hotmail.com
+  from: kamalhashi@hotmail.com
+  password:
+  subject: "Portfolio eStatement"
+  smtp:
+    starttls:
+      enable: true
+    auth: true
+
+customer:
+  service:
+    url: https://digital-dev.mashreq.com/api/customers-service/api/customers/
+    profile:
+      path: cif/
+    search:
+      path: search
+
+shedlock:
+  eom:
+    atleast: PT7S
+    atmost: PT12S
+  adhoc:
+    atleast: PT5S
+    atmost: PT10S
+  customer:
+    atleast: PT3S
+    atmost: PT3S
+  default: PT5S
+
+ldap:
+  service:
+    url: https://digital-dev.mashreq.com/api/ldapauth-service/
+  auth:
+    header:
+      username: branchportal
+      password: branchportalsecret
+  client:
+    id: branchportal
+  ad:
+    pass_key: password
+    username: ubtest4
+    password: Mashreq@2019
+
+management:
+  endpoints:
+    web:
+      base-path: /api/actuator

@@ -1,0 +1,16 @@
+Customer has Existing customers , 
+
+
+Risk porfiling ->  Customer Signes agreement ->  validation (is GCC, Emriates ID)
+
+Risk Profiles -> customer will be asked seriouse of questions - > and this questions will be sent to FinQ api
+
+Risk Profiling -> FinQ will be used  (FinQ has an api's )
+
+USSM - > Authentication  will be handled by FinIQ
+
+KYC needs to be update it his ID and passport , this validation needs to happen first 
+
+IMA?
+CBRA?
+IMA?

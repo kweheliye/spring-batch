@@ -1,0 +1,148 @@
+@startuml
+
+package com.mashreq.wealth {
+    package enums {
+        enum FileNameStatus {
+            VALID,
+            INVALID
+        }
+        enum CustomerType {
+            RETAIL
+        }
+        enum EmailStatus {
+            SENT_SUCCESS,
+            NOT_SENT,
+            SENT_FAILURE
+        }
+        enum ProcessStatus {
+            STARTED,
+            NOT_STARTED,
+            COMPLETED;
+        }
+    }
+    package helper {
+        class CSVReader {
+            + readCustomerInfoFromCSV(input:String) : Map<Long, CustomerInfoDto>
+            - mapToCustomerInfoDto (line: String) : CustomerInfo
+        }
+        class DTWRestClient {
+            + REQUEST_URL : String
+            + getCustomerInfoByClientId(clientId: Long): CustomerInfo
+        }
+    }
+    package model {
+        class CustomerInfo {
+            - clientId: Long
+            - firstname: String
+            - lastname: String
+            - email: String
+            - customerType: CustomerType
+        }
+        class Mail {
+            - mailFrom: String
+            - mailTo: String
+            - mailSubject: String
+            - mailContent: String
+            - contentType= String
+            - attachment: File
+            - model: Map< String, CustomerInfo>
+        }
+        note bottom of Mail : is Mail object in the right package ?
+    }
+    package entity {
+        class Statement {
+            - clientId: Long
+            - profileId: Long
+            - date: Long
+            - filename: String
+            - file: File
+            - statementStatus: StatementStatus
+        }
+        class StatementStatus {
+
+            - processStatus: ProcessStatus
+            - emailStatus: EmailStatus
+            - fileNameStatus: FileNameStatus
+            - statement: Statement
+        }
+        Statement -- StatementStatus
+    }
+
+    package service {
+        interface StatementService    {
+            + saveOrUpdate(statement: Statement): Statement
+            + findByFilename(filename: String): Statement
+        }
+        interface CustomerInfoService {
+            + getInfoByClientId(clientId: Long ): CustomerInfo
+        }
+        interface MailService {
+            + sendMailStatementToCustomer(Mail: mail)
+        }
+        package implementation {
+            class StatementServiceImp{
+                + saveOrUpdate (statement: Statement): Statement {redefines}
+                + findByFilename(filename: String): Statement {redefines}
+            }
+            class EOMCustomerInfoServiceImp {
+                - csvReader: CSVReader
+                + getInfoByClientId(clientId: Long ): CustomerInfo {redefines}
+            }
+            class AdhocCustomerInfoServiceImp {
+                + getInfoByClientId(clientId: Long ): CustomerInfo {redefines}
+            }
+            class MailServiceImpl {
+               + sendMailStatementToCustomer(clientId: Long ): CustomerInfo {redefines}
+            }
+        }
+        StatementService <|-- StatementServiceImp
+        CustomerInfoService <|-- EOMCustomerInfoServiceImp
+        CustomerInfoService <|-- AdhocCustomerInfoServiceImp
+        MailService <|-- MailServiceImpl
+        EOMCustomerInfoServiceImp -- CSVReader
+        AdhocCustomerInfoServiceImp -- DTWRestClient
+
+        note top of CustomerInfoService : please check return type of getInfoByClientId
+
+    }
+
+    package batch.config  {
+        package reader {
+            class DirectoryItemReader{
+                - foundFiles :Queue<File>
+                - getFiles() : Resource[]
+                - getFoundFiles() : Queue<File>
+                - read() : File
+            }
+        }
+        package processor {
+            class StatementItemProcessor {
+                - statementService: StatementService
+                + parseFileName(filename: String): Statement
+                + process(fileItem: File): Statement
+            }
+            note bottom of StatementItemProcessor : null fileItem will not be processed
+        }
+        package sender {
+            class StatementMailSender{
+                - statementService: StatementService
+                - customerInfoService: CustomerInfoService
+                - mailService: MailService
+                + write(statements: List<? extends Statement> )
+            }
+        }
+        StatementBatchConfig -- StatementItemProcessor
+        StatementBatchConfig -- DirectoryItemReader
+        StatementBatchConfig -- StatementMailSender
+
+        StatementItemProcessor -- StatementService  : update state
+        StatementMailSender -- StatementService : update state
+        StatementMailSender -- CustomerInfoService : fetchCustomerInfo
+        StatementMailSender --  MailService : send mail
+    }
+    'Positioning batch.config on below batch service
+    batch.config -[hidden]-> service
+
+
+}
+@enduml

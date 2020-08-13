@@ -1,0 +1,90 @@
+spring:
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    database: SQL_SERVER
+    show-sql: false
+    hibernate:
+      dialect: org.hibernate.dialect. SQLServer2012Dialect
+      naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
+      ddl-auto: update
+  batch:
+    initialize-schema: always
+    job:
+      enabled: false
+
+cron:
+  job:
+    eom: 0 0 7 1 * ?
+    adhoc: 0 30 * * * ?
+    customer: 0 0 6 1 * ?
+
+shedlock:
+  eom:
+    atleast: PT180M
+    atmost: PT200M
+  adhoc:
+    atleast: PT10M
+    atmost: PT20M
+  customer:
+    atleast: PT10M
+    atmost: PT20M
+  default: PT30S
+
+directory:
+  statement:
+    eom: /usr/images/wealth-statement-service/statements/eom/
+    adhoc: /usr/images/wealth-statement-service/statements/adhoc/
+
+maven:
+  basedir: @project.basedir@
+file:
+  path:
+    customer-info: /usr/images/wealth-statement-service/customers/uae_MACIS.txt
+
+template:
+  folder: /templates
+  statement: statement-template.ftl
+
+mail:
+  default-encoding: UTF-8
+  port: ${MAIL_PORT}
+  host: ${MAIL_HOST}
+  debug: ${MAIL_DEBUG}
+  username:
+  from: ${MAIL_FROM}
+  password:
+  subject: ${MAIL_SUBJECT}
+  smtp:
+    starttls:
+      enable: false
+    auth: false
+
+customer:
+  service:
+    url: ${CUSTOMER_SERVICE_URL}
+    profile:
+      path: ${CUSTOMER_SERVICE_PROFILE_PATH}
+    search:
+      path: ${CUSTOMER_SERVICE_SEARCH_PATH}
+ldap:
+  service:
+    url:  ${LDAP_SERVICE_URL}
+  auth:
+    header:
+      username: ${LDAP_AUTH_HEADER_USERNAME}
+      password: ${LDAP_AUTH_HEADER_PASSWORD}
+  client:
+    id: ${LDAP_CLIENT_ID}
+  ad:
+    pass_key: ${LDAP_AD_PASS_KEY}
+    username: ${LDAP_AD_USERNAME}
+    password: ${LDAP_AD_PASSWORD}
+
+management:
+  endpoints:
+    web:
+      base-path: /api/actuator

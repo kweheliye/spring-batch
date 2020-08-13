@@ -1,0 +1,18 @@
+trigger:
+  - master
+  - development
+
+pr:
+  - master
+  - development
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: Core/build-templates
+
+jobs:
+  - template: job-build-springboot-jar.yaml@templates
+    parameters:
+      VeracodeAppName: 'MS-Common'
